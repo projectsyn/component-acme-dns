@@ -1,0 +1,11 @@
+parameters:
+  kapitan:
+    compile:
+      - input_paths:
+          - acme-dns/component/app.jsonnet
+        input_type: jsonnet
+        output_path: apps/
+      - input_paths:
+          - acme-dns/component/main.jsonnet
+        input_type: jsonnet
+        output_path: acme-dns/

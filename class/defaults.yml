@@ -1,0 +1,4 @@
+parameters:
+  acme_dns:
+    =_metadata: {}
+    namespace: syn-acme-dns
