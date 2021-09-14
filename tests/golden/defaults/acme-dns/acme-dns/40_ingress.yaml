@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-production
+  labels:
+    name: acme-dns-api
+  name: acme-dns-api
+  namespace: syn-acme-dns-acme-dns
+spec:
+  rules:
+    - host: acme-dns-api.example.com
+      http:
+        paths:
+          - backend:
+              serviceName: acme-dns-api
+              servicePort: 8080
+            path: /
+            pathType: Prefix
+  tls:
+    - hosts:
+        - acme-dns-api.example.com
+      secretName: acme-dns-api-cert

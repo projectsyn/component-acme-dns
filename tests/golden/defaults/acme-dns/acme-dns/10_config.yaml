@@ -1,0 +1,87 @@
+apiVersion: v1
+data:
+  config.cfg: '[api]
+
+    corsorigins = *
+
+    disable_registration = false
+
+    header_name = X-Forwarded-For
+
+    ip = 127.0.0.1
+
+    port = 8000
+
+    tls = none
+
+    use_header = true
+
+    [database]
+
+    connection = /var/lib/acme-dns/acme-dns.db
+
+    engine = sqlite3
+
+    [general]
+
+    debug = false
+
+    domain = acme-dns.example.com
+
+    listen = 0.0.0.0:5533
+
+    nsadmin = support@example.com
+
+    nsname = acme-dns-ns.example.com
+
+    protocol = both4
+
+    [logconfig]
+
+    logformat = text
+
+    loglevel = info
+
+    logtype = stdout
+
+    '
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    name: acmedns-config
+  name: acmedns-config
+  namespace: syn-acme-dns-acme-dns
+---
+apiVersion: v1
+data:
+  caddy.json.tpl: '{"apps": {"http": {"servers": {"srv0": {"listen": [":8080"], "routes":
+    [{"handle": [{"handler": "authentication", "providers": {"http_basic": {"accounts":
+    [{"password": "THE_PASSWORD", "username": "acme-dns"}], "hash": {"algorithm":
+    "bcrypt"}}}}, {"handler": "reverse_proxy", "upstreams": [{"dial": "127.0.0.1:8000"}]}],
+    "match": [{"path": ["/*"]}]}]}}}}}'
+  render-config: 'pw=`caddy hash-password -plaintext ${BASIC_AUTH_PASSWORD}`
+
+    sed -e "s/THE_PASSWORD/${pw}/" /etc/caddy/caddy.json.tpl > /etc/caddy.out/caddy.json
+
+    '
+kind: ConfigMap
+metadata:
+  annotations: {}
+  labels:
+    name: acmedns-caddy-config
+  name: acmedns-caddy-config
+  namespace: syn-acme-dns-acme-dns
+---
+apiVersion: v1
+data: {}
+kind: Secret
+metadata:
+  annotations: {}
+  labels:
+    name: acmedns-basicauth
+  name: acmedns-basicauth
+  namespace: syn-acme-dns-acme-dns
+stringData:
+  password: t-silent-test-1234/c-green-test-1234/acme-dns/acme-dns/api-password
+type: Opaque

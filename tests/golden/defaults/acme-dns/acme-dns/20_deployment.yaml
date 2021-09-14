@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations: {}
+  labels:
+    name: acme-dns
+  name: acme-dns
+  namespace: syn-acme-dns-acme-dns
+spec:
+  minReadySeconds: 30
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: acme-dns
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations: {}
+      labels:
+        name: acme-dns
+    spec:
+      containers:
+        - args: []
+          env: []
+          image: docker.io/joohoi/acme-dns:latest
+          imagePullPolicy: Always
+          name: acme-dns
+          ports:
+            - containerPort: 5533
+              name: dns
+              protocol: UDP
+          stdin: false
+          tty: false
+          volumeMounts:
+            - mountPath: /etc/acme-dns
+              name: acmedns-config
+              readOnly: true
+            - mountPath: /var/lib/acme-dns
+              name: acmedns-data
+        - args: []
+          command:
+            - caddy
+            - run
+            - -config
+            - /etc/caddy/caddy.json
+          env: []
+          image: docker.io/caddy/caddy:alpine
+          imagePullPolicy: IfNotPresent
+          name: caddy
+          ports:
+            - containerPort: 8080
+              name: api
+              protocol: TCP
+          stdin: false
+          tty: false
+          volumeMounts:
+            - mountPath: /etc/caddy
+              name: caddy-config
+              readOnly: true
+      imagePullSecrets: []
+      initContainers:
+        - args: []
+          command:
+            - /bin/sh
+            - /etc/caddy/render-config
+          env:
+            - name: BASIC_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: acmedns-basicauth
+          image: docker.io/caddy/caddy:alpine
+          imagePullPolicy: IfNotPresent
+          name: render-caddy-config
+          ports: []
+          stdin: false
+          tty: false
+          volumeMounts:
+            - mountPath: /etc/caddy.out
+              name: caddy-config
+            - mountPath: /etc/caddy
+              name: caddy-config-template
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - configMap:
+            defaultMode: 256
+            name: acmedns-config
+          name: acmedns-config
+        - name: acmedns-data
+          persistentVolumeClaim:
+            claimName: acmedns-data
+        - emptyDir: {}
+          name: caddy-config
+        - configMap:
+            items:
+              - key: render-config
+                mode: 448
+                path: render-config
+              - key: caddy.json.tpl
+                mode: 256
+                path: caddy.json.tpl
+            name: acmedns-caddy-config
+          name: caddy-config-template

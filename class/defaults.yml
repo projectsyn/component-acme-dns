@@ -16,10 +16,13 @@ parameters:
 
     api:
       hostname: acme-dns-api.example.com
-      # basic auth config for ingress/route
+      # basic auth config (implemented as caddy sidecar)
       basicAuth:
         username: acme-dns
         password: ?{vaultkv:${cluster:tenant}/${cluster:name}/acme-dns/${_instance}/api-password}
+      tls:
+        issuer:
+          name: letsencrypt-production
 
     config:
       general:
