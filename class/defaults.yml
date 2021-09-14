@@ -1,4 +1,46 @@
 parameters:
   acme_dns:
     =_metadata: {}
-    namespace: syn-acme-dns
+    multi_instance: true
+    namespace: syn-acme-dns-${_instance}
+
+    images:
+      acme-dns:
+        registry: docker.io
+        repository: joohoi/acme-dns
+        tag: latest
+      caddy:
+        registry: docker.io
+        repository: caddy/caddy
+        tag: alpine
+
+    api:
+      hostname: acme-dns-api.example.com
+      # basic auth config for ingress/route
+      basicAuth:
+        username: acme-dns
+        password: ?{vaultkv:${cluster:tenant}/${cluster:name}/acme-dns/${_instance}/api-password}
+
+    config:
+      general:
+        # the domain which the dns server serves
+        domain: acme-dns.example.com
+        # the hostname of the dns server
+        nsname: acme-dns-ns.example.com
+        nsadmin: support@example.com
+      logconfig:
+        loglevel: info
+        logtype: stdout
+        logformat: text
+
+    persistence:
+      # enabled=false -> store sqlite db in emptydir
+      enabled: true
+      volumeSize: 1Gi
+      storageClassName: ~
+      # K8up config
+      backup:
+        schedule: '*/30 * * * *'
+        bucket: thebucket
+        accesskey: ?{vaultkv:${cluster:tenant}/${cluster:name}/acme-dns/${_instance}/backup-accesskey}
+        secretkey: ?{vaultkv:${cluster:tenant}/${cluster:name}/acme-dns/${_instance}/backup-secretkey}
