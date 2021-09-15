@@ -231,11 +231,6 @@ local api_service = kube.Service('acme-dns-api') {
 local ingress = (
   if on_ocp3 then
     kube._Object('route.openshift.io/v1', 'Route', 'acme-dns-api') {
-      metadata+: {
-        annotations+: {
-          'kubernetes.io/tls-acme': 'true',
-        },
-      },
       spec: {
         host: params.api.hostname,
         to: {
@@ -250,11 +245,6 @@ local ingress = (
     }
   else
     kube.Ingress('acme-dns-api') {
-      metadata+: {
-        annotations+: {
-          'cert-manager.io/cluster-issuer': params.api.tls.issuer.name,
-        },
-      },
       spec: {
         rules: [
           {
@@ -278,7 +268,11 @@ local ingress = (
         ],
       },
     }
-);
+) + {
+  metadata+: {
+    annotations+: std.prune(params.api.ingress.annotations),
+  },
+};
 
 local makeNamespaced(key, obj) =
   if std.isObject(obj) then (

@@ -24,9 +24,10 @@ parameters:
       basicAuth:
         username: acme-dns
         password: ?{vaultkv:${cluster:tenant}/${cluster:name}/acme-dns/${_instance}/api-password}
-      tls:
-        issuer:
-          name: letsencrypt-production
+      # ingress config
+      ingress:
+        annotations:
+          cert-manager.io/cluster-issuer: letsencrypt-production
 
     config:
       general:
