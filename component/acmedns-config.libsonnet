@@ -27,6 +27,14 @@ local baseConfig = {
   },
 };
 
+local sanitizeConfig(cfg) =
+  cfg {
+    general+: {
+      nsadmin: std.strReplace(super.nsadmin, '@', '.'),
+    },
+  };
+
+
 local manifestToml(cfg) =
   local manifestSection(k, v) =
     local header = '[%s]' % k;
@@ -51,7 +59,9 @@ local manifestToml(cfg) =
   configmap: kube.ConfigMap(common.acme_dns.cm_name) {
     data: {
       'config.cfg': manifestToml(
-        baseConfig + com.makeMergeable(params.config)
+        sanitizeConfig(
+          baseConfig + com.makeMergeable(params.config)
+        )
       ),
     },
   },
