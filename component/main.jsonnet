@@ -36,9 +36,29 @@ local dataVolume =
     emptyDir: {},
   };
 
+local configs = [
+  acmedns_config.configmap,
+  caddy_config.configmap,
+  caddy_config.pwsecret,
+];
+local confighash =
+  local data(c) =
+    if c.kind == 'ConfigMap' then
+      c.data
+    else if c.kind == 'Secret' then
+      c.stringData
+    else
+      error "Unknown config source with kind '%s'" % c.kind;
+  std.md5(std.join('\n', [ '%s' % std.manifestJson(data(c)) for c in configs ]));
+
 local deployment = kube.Deployment('acme-dns') {
   spec+: {
     template+: {
+      metadata+: {
+        annotations+: {
+          'acme-dns.syn.tools/config-hash': confighash,
+        },
+      },
       spec+: {
         default_container:: 'acme_dns',
         containers_:: {
@@ -252,11 +272,7 @@ std.mapWithKey(
   {
     [if params.persistence.enabled then '10_pvc']:
       pvc,
-    '10_config': [
-      acmedns_config.configmap,
-      caddy_config.configmap,
-      caddy_config.pwsecret,
-    ],
+    '10_config': configs,
     '20_deployment': deployment,
     '30_service': [ api_service, dns_service ],
     '40_ingress': ingress,

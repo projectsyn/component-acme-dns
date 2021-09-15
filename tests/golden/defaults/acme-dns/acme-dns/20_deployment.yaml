@@ -20,7 +20,8 @@ spec:
     type: RollingUpdate
   template:
     metadata:
-      annotations: {}
+      annotations:
+        acme-dns.syn.tools/config-hash: 5d56811df7d2dcd5f74369c621f6bef9
       labels:
         name: acme-dns
     spec:
