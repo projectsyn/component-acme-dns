@@ -13,6 +13,10 @@ parameters:
         registry: docker.io
         repository: caddy/caddy
         tag: alpine
+      sqlite:
+        registry: docker.io
+        repository: nouchka/sqlite3
+        tag: latest
 
     api:
       hostname: acme-dns-api.example.com
@@ -43,7 +47,9 @@ parameters:
       storageClassName: ~
       # K8up config
       backup:
+        enabled: true
         schedule: '*/30 * * * *'
         bucket: thebucket
+        password: ?{vaultkv:${cluster:tenant}/${cluster:name}/acme-dns/${_instance}/backup-password}
         accesskey: ?{vaultkv:${cluster:tenant}/${cluster:name}/acme-dns/${_instance}/backup-accesskey}
         secretkey: ?{vaultkv:${cluster:tenant}/${cluster:name}/acme-dns/${_instance}/backup-secretkey}

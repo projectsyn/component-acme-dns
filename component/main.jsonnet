@@ -217,11 +217,32 @@ local ingress = (
 );
 
 local makeNamespaced(key, obj) =
-  if std.isObject(obj) then
-    com.namespaced(params.namespace, obj)
-  else if std.isArray(obj) then
-    std.map(function(it) com.namespaced(params.namespace, it), obj)
-  else error 'Emitting value which is neither object nor array';
+  if std.isObject(obj) then (
+    if std.objectHas(obj, 'kind') then
+      com.namespaced(params.namespace, obj)
+    else
+      obj
+  ) else if std.isArray(obj) then (
+    std.map(
+      function(it)
+        if std.objectHas(it, 'kind') then
+          com.namespaced(params.namespace, it)
+        else
+          it,
+      obj
+    )
+  ) else error 'Emitting value which is neither object nor array';
+
+local backup_objs =
+  backup.secrets +
+  [
+    backup.prebackuppod(dataVolume),
+    backup.schedule,
+  ];
+
+local configure_backup =
+  params.persistence.enabled &&
+  params.persistence.backup.enabled;
 
 {
   '00_namespace': namespace,
@@ -239,6 +260,7 @@ std.mapWithKey(
     '20_deployment': deployment,
     '30_service': [ api_service, dns_service ],
     '40_ingress': ingress,
-    '50_backup': backup.schedule,
+    [if configure_backup then '50_backup']:
+      backup_objs,
   }
 )

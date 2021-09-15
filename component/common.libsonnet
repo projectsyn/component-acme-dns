@@ -3,6 +3,7 @@
     api_port: 8000,
     cm_name: 'acmedns-config',
     datadir: '/var/lib/acme-dns',
+    dbpath: '%s/acme-dns.db' % self.datadir,
     dns_port: 5533,
   },
   caddy: {
