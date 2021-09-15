@@ -13,8 +13,13 @@ local base_config = {
           listen: [ ':8080' ],
           routes: [
             {
+              // Enable basic auth for /register endpoint
               match: [
-                { path: [ '/*' ] },
+                {
+                  path: [
+                    '/register',
+                  ],
+                },
               ],
               handle: [
                 {
@@ -33,6 +38,10 @@ local base_config = {
                     },
                   },
                 },
+              ],
+            },
+            {
+              handle: [
                 {
                   handler: 'reverse_proxy',
                   upstreams: [

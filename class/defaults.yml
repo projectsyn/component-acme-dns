@@ -20,7 +20,7 @@ parameters:
 
     api:
       hostname: acme-dns-api.example.com
-      # basic auth config (implemented as caddy sidecar)
+      # basic auth config for /register (implemented as caddy sidecar)
       basicAuth:
         username: acme-dns
         password: ?{vaultkv:${cluster:tenant}/${cluster:name}/acme-dns/${_instance}/api-password}
