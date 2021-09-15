@@ -79,6 +79,28 @@ local deployment = kube.Deployment('acme-dns') {
                 mountPath: common.acme_dns.datadir,
               },
             },
+            livenessProbe: {
+              failureThreshold: 3,
+              httpGet: {
+                path: '/health',
+                port: common.acme_dns.api_port,
+              },
+              initialDelaySeconds: 1,
+              periodSeconds: 10,
+              successThreshold: 1,
+              timeoutSeconds: 1,
+            },
+            readinessProbe: {
+              failureThreshold: 3,
+              httpGet: {
+                path: '/health',
+                port: common.acme_dns.api_port,
+              },
+              initialDelaySeconds: 1,
+              periodSeconds: 10,
+              successThreshold: 1,
+              timeoutSeconds: 1,
+            },
           },
           caddy: kube.Container('caddy') {
             image: common.image(params.images.caddy),
@@ -88,6 +110,28 @@ local deployment = kube.Deployment('acme-dns') {
                 protocol: 'TCP',
                 containerPort: common.caddy.api_port,
               },
+            },
+            livenessProbe: {
+              failureThreshold: 3,
+              httpGet: {
+                path: '/healthz',
+                port: common.caddy.api_port,
+              },
+              initialDelaySeconds: 1,
+              periodSeconds: 10,
+              successThreshold: 1,
+              timeoutSeconds: 1,
+            },
+            readinessProbe: {
+              failureThreshold: 3,
+              httpGet: {
+                path: '/healthz',
+                port: common.caddy.api_port,
+              },
+              initialDelaySeconds: 1,
+              periodSeconds: 10,
+              successThreshold: 1,
+              timeoutSeconds: 1,
             },
             volumeMounts_: {
               caddy_config: {

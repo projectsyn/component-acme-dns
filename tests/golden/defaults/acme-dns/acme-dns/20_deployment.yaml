@@ -21,7 +21,7 @@ spec:
   template:
     metadata:
       annotations:
-        acme-dns.syn.tools/config-hash: 5d56811df7d2dcd5f74369c621f6bef9
+        acme-dns.syn.tools/config-hash: 84494386487cc380f039be8340c47348
       labels:
         name: acme-dns
     spec:
@@ -30,11 +30,29 @@ spec:
           env: []
           image: docker.io/joohoi/acme-dns:latest
           imagePullPolicy: Always
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
           name: acme-dns
           ports:
             - containerPort: 5533
               name: dns
               protocol: UDP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
           stdin: false
           tty: false
           volumeMounts:
@@ -52,11 +70,29 @@ spec:
           env: []
           image: docker.io/caddy/caddy:alpine
           imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
           name: caddy
           ports:
             - containerPort: 8080
               name: api
               protocol: TCP
+          readinessProbe:
+            failureThreshold: 3
+            httpGet:
+              path: /healthz
+              port: 8080
+            initialDelaySeconds: 1
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 1
           stdin: false
           tty: false
           volumeMounts:

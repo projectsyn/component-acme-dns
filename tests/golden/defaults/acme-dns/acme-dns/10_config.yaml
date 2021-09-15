@@ -8,7 +8,7 @@ data:
 
     header_name="X-Forwarded-For"
 
-    ip="127.0.0.1"
+    ip="0.0.0.0"
 
     port="8000"
 
@@ -57,7 +57,9 @@ data:
     {"listen": [":8080"], "routes": [{"handle": [{"handler": "authentication", "providers":
     {"http_basic": {"accounts": [{"password": "THE_PASSWORD", "username": "acme-dns"}],
     "hash": {"algorithm": "bcrypt"}, "realm": "acme-dns"}}}], "match": [{"path": ["/register"]}]},
-    {"handle": [{"handler": "reverse_proxy", "upstreams": [{"dial": "127.0.0.1:8000"}]}]}]}}}}}'
+    {"handle": [{"body": "OK", "handler": "static_response", "status_code": 200}],
+    "match": [{"path": ["/healthz"]}]}, {"handle": [{"handler": "reverse_proxy", "upstreams":
+    [{"dial": "127.0.0.1:8000"}]}]}]}}}}}'
   render-config: 'pw=`caddy hash-password -plaintext ${BASIC_AUTH_PASSWORD}`
 
     sed -e "s/THE_PASSWORD/${pw}/" /etc/caddy/caddy.json.tpl > /etc/caddy.out/caddy.json

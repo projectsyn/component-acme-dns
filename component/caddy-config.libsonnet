@@ -45,6 +45,23 @@ local base_config = {
                 },
               ],
             },
+            // for the container health check
+            {
+              match: [
+                {
+                  path: [
+                    '/healthz',
+                  ],
+                },
+              ],
+              handle: [
+                {
+                  body: 'OK',
+                  handler: 'static_response',
+                  status_code: 200,
+                },
+              ],
+            },
             {
               handle: [
                 {

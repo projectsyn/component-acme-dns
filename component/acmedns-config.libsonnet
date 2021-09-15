@@ -17,7 +17,7 @@ local baseConfig = {
     connection: '%s/acme-dns.db' % common.acme_dns.datadir,
   },
   api: {
-    ip: '127.0.0.1',
+    ip: '0.0.0.0',
     disable_registration: false,
     port: common.acme_dns.api_port,
     tls: 'none',
