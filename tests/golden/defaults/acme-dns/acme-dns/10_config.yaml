@@ -2,49 +2,47 @@ apiVersion: v1
 data:
   config.cfg: '[api]
 
-    corsorigins = *
+    corsorigins=["*"]
 
-    disable_registration = false
+    disable_registration=false
 
-    header_name = X-Forwarded-For
+    header_name="X-Forwarded-For"
 
-    ip = 127.0.0.1
+    ip="127.0.0.1"
 
-    port = 8000
+    port="8000"
 
-    tls = none
+    tls="none"
 
-    use_header = true
+    use_header=true
 
     [database]
 
-    connection = /var/lib/acme-dns/acme-dns.db
+    connection="/var/lib/acme-dns/acme-dns.db"
 
-    engine = sqlite3
+    engine="sqlite3"
 
     [general]
 
-    debug = false
+    debug=false
 
-    domain = acme-dns.example.com
+    domain="acme-dns.example.com"
 
-    listen = 0.0.0.0:5533
+    listen="0.0.0.0:5533"
 
-    nsadmin = support@example.com
+    nsadmin="support@example.com"
 
-    nsname = acme-dns-ns.example.com
+    nsname="acme-dns-ns.example.com"
 
-    protocol = both4
+    protocol="both4"
 
     [logconfig]
 
-    logformat = text
+    logformat="text"
 
-    loglevel = info
+    loglevel="info"
 
-    logtype = stdout
-
-    '
+    logtype="stdout"'
 kind: ConfigMap
 metadata:
   annotations: {}
