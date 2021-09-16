@@ -145,14 +145,13 @@ local deployment = kube.Deployment('acme-dns') {
           render_caddy_config: kube.Container('render-caddy-config') {
             image: common.image(params.images.caddy),
             command: [ '/bin/sh', '/etc/caddy/render-config' ],
-            env_: {
-              BASIC_AUTH_PASSWORD: {
-                secretKeyRef: {
+            envFrom: [
+              {
+                secretRef: {
                   name: common.caddy.basicauth_secretname,
-                  key: 'password',
                 },
               },
-            },
+            ],
             volumeMounts_: {
               caddy_config: {
                 mountPath: '/etc/caddy.out',

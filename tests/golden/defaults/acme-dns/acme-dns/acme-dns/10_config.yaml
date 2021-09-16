@@ -85,5 +85,5 @@ metadata:
   name: acmedns-basicauth
   namespace: syn-acme-dns-acme-dns
 stringData:
-  password: t-silent-test-1234/c-green-test-1234/acme-dns/acme-dns/api-password
+  BASIC_AUTH_PASSWORD: t-silent-test-1234/c-green-test-1234/acme-dns/acme-dns/api-password
 type: Opaque

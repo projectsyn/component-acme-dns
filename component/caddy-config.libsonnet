@@ -91,7 +91,7 @@ local base_config = {
   },
   pwsecret: kube.Secret(common.caddy.basicauth_secretname) {
     stringData: {
-      password: params.api.basicAuth.password,
+      BASIC_AUTH_PASSWORD: params.api.basicAuth.password,
     },
   },
 }

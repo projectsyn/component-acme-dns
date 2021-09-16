@@ -21,7 +21,7 @@ spec:
   template:
     metadata:
       annotations:
-        acme-dns.syn.tools/config-hash: 1e7324d3126bbcc060bd29abda5d3bba
+        acme-dns.syn.tools/config-hash: f3f00454a1fc258dbece8f244afa6f2c
       labels:
         name: acme-dns
     spec:
@@ -105,12 +105,10 @@ spec:
           command:
             - /bin/sh
             - /etc/caddy/render-config
-          env:
-            - name: BASIC_AUTH_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: acmedns-basicauth
+          env: []
+          envFrom:
+            - secretRef:
+                name: acmedns-basicauth
           image: docker.io/caddy/caddy:alpine
           imagePullPolicy: IfNotPresent
           name: render-caddy-config
