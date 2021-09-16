@@ -36,6 +36,8 @@ data:
 
     protocol="both4"
 
+    records=["acme-dns.example.com. NS acme-dns-ns.example.com."]
+
     [logconfig]
 
     logformat="text"

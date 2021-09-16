@@ -21,7 +21,7 @@ spec:
   template:
     metadata:
       annotations:
-        acme-dns.syn.tools/config-hash: 84494386487cc380f039be8340c47348
+        acme-dns.syn.tools/config-hash: 1e7324d3126bbcc060bd29abda5d3bba
       labels:
         name: acme-dns
     spec:

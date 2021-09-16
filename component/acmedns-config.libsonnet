@@ -11,6 +11,9 @@ local baseConfig = {
     listen: '0.0.0.0:%d' % common.acme_dns.dns_port,
     protocol: 'both4',
     debug: false,
+    records: [
+      '%(domain)s. NS %(nsname)s.' % params.config.general,
+    ],
   },
   database: {
     engine: 'sqlite3',
