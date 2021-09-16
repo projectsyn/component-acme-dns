@@ -14,7 +14,7 @@ local base_config = {
     http: {
       servers: {
         srv0: {
-          listen: [ ':8080' ],
+          listen: [ ':%d' % common.caddy.api_port ],
           routes: [
             {
               // Enable basic auth for /register endpoint
