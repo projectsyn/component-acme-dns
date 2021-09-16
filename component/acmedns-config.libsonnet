@@ -45,7 +45,7 @@ local manifestToml(cfg) =
       if std.isArray(v) then
         '%s' % [ v ]
       else if std.isObject(v) then
-        error 'Cannot render objects in TOML config'
+        error 'Rendering objects as TOML not supported'
       else if std.isString(v) || std.isNumber(v) then
         '"%s"' % v
       else
