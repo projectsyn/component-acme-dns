@@ -50,6 +50,7 @@ parameters:
       backup:
         enabled: true
         schedule: '*/30 * * * *'
+        endpoint: ~
         bucket: thebucket
         password: ?{vaultkv:${cluster:tenant}/${cluster:name}/acme-dns/${_instance}/backup-password}
         accesskey: ?{vaultkv:${cluster:tenant}/${cluster:name}/acme-dns/${_instance}/backup-accesskey}

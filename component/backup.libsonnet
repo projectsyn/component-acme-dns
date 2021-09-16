@@ -38,7 +38,15 @@ local schedule =
       secretkeyname: 'secretkey',
     },
     create_bucket=false,
-  );
+  ) {
+    spec+: {
+      backend+: {
+        s3+: {
+          [if backup_params.endpoint != null then 'endpoint']: backup_params.endpoint,
+        },
+      },
+    },
+  };
 
 local prebackuppod(volspec) =
   k8up.PreBackupPod(
