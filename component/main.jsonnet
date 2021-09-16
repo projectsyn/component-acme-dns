@@ -273,7 +273,7 @@ local ingress = (
   },
 };
 
-local makeNamespaced(key, obj) =
+local makeNamespaced(obj) =
   if std.isObject(obj) then (
     if std.objectHas(obj, 'kind') then
       com.namespaced(params.namespace, obj)
@@ -305,7 +305,7 @@ local configure_backup =
   '00_namespace': namespace,
 } +
 std.mapWithKey(
-  makeNamespaced,
+  function(k, o) makeNamespaced(o),
   {
     [if params.persistence.enabled then '10_pvc']:
       pvc,
