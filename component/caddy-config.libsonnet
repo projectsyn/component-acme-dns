@@ -6,6 +6,10 @@ local inv = kap.inventory();
 local params = inv.parameters.acme_dns;
 
 local base_config = {
+  // disable admin interface
+  admin: {
+    disabled: true,
+  },
   apps: {
     http: {
       servers: {
