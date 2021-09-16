@@ -39,6 +39,7 @@ local base_config = {
                         },
                       ],
                       hash: { algorithm: 'bcrypt' },
+                      realm: 'acme-dns',
                     },
                   },
                 },
