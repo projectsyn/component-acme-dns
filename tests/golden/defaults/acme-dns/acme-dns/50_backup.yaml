@@ -83,7 +83,7 @@ spec:
       accessKeyIDSecretRef:
         key: accesskey
         name: acme-dns-backup-s3-credentials
-      bucket: thebucket
+      bucket: c-green-test-1234-syn-acme-dns-acme-dns-backup
       endpoint: null
       secretAccessKeySecretRef:
         key: secretkey
