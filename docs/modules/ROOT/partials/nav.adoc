@@ -1,2 +1,3 @@
 * xref:index.adoc[Home]
+* xref:how-tos/setup.adoc[Component setup]
 * xref:references/parameters.adoc[Parameters]

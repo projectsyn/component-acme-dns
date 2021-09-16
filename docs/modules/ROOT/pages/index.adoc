@@ -4,4 +4,4 @@ acme-dns is a Commodore component to manage https://github.com/joohoi/acme-dns[a
 
 See the xref:references/parameters.adoc[parameters] reference for further details on configurable options.
 
-See the xref:how-tos/getting-started.adoc[getting started guide] for required configurations outside the component.
+See the xref:how-tos/setup.adoc[component setup] how-to for instructions to get an acme-dns instance setup using this component.
