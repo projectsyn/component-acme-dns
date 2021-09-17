@@ -8,36 +8,11 @@ This guide helps you to get an acme-dns instance deployed and configured as a na
 * You have a Kubernetes or OpenShift cluster which supports service type `LoadBalancer`
 * `curl`
 * `jq`
-* https://github.com/mikefarah/yq[`yq`, version 4+]
 * `vault` CLI
-
-== Prepare local environment
-
-First, you need to get a local copy of the catalog for the cluster on which you want to deploy acme-dns.
-As mentioned in the prerequisites, acme-dns requires a service of type `LoadBalancer` for the nameserver endpoint.
-
-[source,console]
-----
-$ TMPDIR=$(mktmp -d)
-$ pushd "${TMPDIR}"
-$ export CLUSTER_ID=c-cluster-id <1>
-$ commodore catalog compile "${CLUSTER_ID}"
-----
-<1> The Project Syn cluster ID of the selected cluster.
-We'll use this variable again in later sections.
 
 == Enable the acme-dns component
 
-. Switch to the tenant repository
-+
-[source,console]
-----
-$ TENANT_ID=$(curl -H"Authorization: Bearer ${COMMODORE_API_TOKEN}" \
-    "${COMMODORE_API_URL}/clusters/${CLUSTER_ID}" | jq -r '.tenant')
-$ pushd "inventory/classes/${TENANT_ID}"
-----
-
-. Add the following configuration to the `${CLUSTER_ID}.yml` file:
+. Add the following configuration to your cluster's `c-cluster-id.yml` file:
 +
 [source,yaml]
 ----
@@ -67,13 +42,7 @@ IMPORTANT: Make sure that configurations +++<i class="conum" data-value="4"></i>
 +
 NOTE: See the xref:references/parameters.adoc[parameters] documentation for all the configuration parameters of the component.
 
-== Compile the cluster catalog to deploy acme-dns
-
-[source,console]
-----
-$ popd
-$ commodore catalog compile "${CLUSTER_ID}" --push
-----
+. Compile the cluster catalog to deploy acme-dns to the cluster
 
 == Configure the DNS parent zone
 
