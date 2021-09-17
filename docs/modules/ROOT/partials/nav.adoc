@@ -1,2 +1,4 @@
 * xref:index.adoc[Home]
+* xref:how-tos/setup.adoc[Component setup]
+* xref:how-tos/configure-client.adoc[Configuring a client]
 * xref:references/parameters.adoc[Parameters]

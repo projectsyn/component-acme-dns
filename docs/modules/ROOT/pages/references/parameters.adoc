@@ -2,18 +2,243 @@
 
 The parent key for all of the following parameters is `acme_dns`.
 
+[NOTE]
+====
+The component supports instantiation.
+For component instances, the configuration in the instance's parameters key is merged with the contents of `acme_dns`.
+For configuration parameters which are present both in the instance configuration and parameter `acme_dns`, the values from the instance configuration take precedence.
+====
+
 == `namespace`
 
 [horizontal]
 type:: string
-default:: `syn-acme-dns`
+default:: `syn-acme-dns-${_instance}`
 
 The namespace in which to deploy this component.
 
+IMPORTANT: The component requires that each instance is configured with a separate namespace.
 
-== Example
+== `images`
 
+[horizontal]
+type:: dict
+default:: https://github.com/projectsyn/component-acme-dns/blob/master/class/defaults.yml[See `class/default.yml]
+
+The container images used by the component.
+Each entry in the dict has keys `registry`, `repository`, and `tag`, to configure the image registry, image repository, and image tag respectively.
+
+== `api`
+
+This parameter holds the configuration parameters for the acme-dns HTTP API.
+
+=== `api.hostname`
+
+[horizontal]
+type:: string
+default:: `acme-dns-api.example.com`
+
+The hostname on which the acme-dns API is served.
+
+NOTE: Users must reconfigure this parameter to point to a domain they administer.
+
+=== `api.basicAuth`
+
+[horizontal]
+type:: dict
+default::
++
 [source,yaml]
 ----
-namespace: example-namespace
+username: acme-dns
+password: ?{vaultkv:${cluster:tenant}/${cluster:name}/acme-dns/${_instance}/api-password}
 ----
+
+The HTTP basic authentication username and password for the acme-dns API `/register` endpoint.
+
+=== `api.ingress`
+
+[horizontal]
+type:: dict
+default::
++
+[source,yaml]
+----
+annotations:
+  cert-manager.io/cluster-issuer: letsencrypt-production
+----
+
+Configuration for the `Ingress` (or `Route` object on OpenShift 3).
+Currently, the only supported key is `annotations`, which is used as `metadata.annotations` on the object.
+The component removes annotations with value `null`.
+
+== `config`
+
+This parameter holds the acme-dns configuration which is rendered as a TOML config file by the component.
+
+See https://github.com/joohoi/acme-dns/blob/master/config.cfg[the acme-dns sample config file] for the full set of configuration parameters.
+
+=== `config.general`
+
+[horizontal]
+type:: dict
+default::
++
+[source,yaml]
+----
+domain: acme-dns.example.com
+nsname: acme-dns-ns.example.com
+nsadmin: support@example.com
+----
+
+The general configuration for acme-dns.
+
+* Parameter `domain` specifies the zone for which the service serves TXT records.
+* Parameter `nsname` specifies the zone name server's DNS name.
+* Parameter `nsadmin` specifies the zone admin email address.
+
+The component automatically replaces `@` characters in `nsadmin` with `.`, as documented in the acme-dns sample config file.
+
+NOTE: Users must reconfigure these parameters to point to a zone which they administer.
+
+
+=== `config.logconfig`
+
+[horizontal]
+type:: dict
+default::
++
+[source,yaml]
+----
+loglevel: info
+logtype: stdout
+logformat: json
+----
+
+The acme-dns log configuration.
+
+=== Final configuration
+
+The component merges the contents of `config` into the following default TOML configuration:
+
+[source,toml]
+----
+[general]
+listen = "0.0.0.0:5533"
+protocol = "both4"
+debug = false
+records = [
+    '${acme_dns:config:general:domain}. NS ${acme_dns:config:general:nsname}.'
+]
+
+[database]
+engine = "sqlite3"
+connection = "/var/lib/acme-dns/acme-dns.db"
+
+[api]
+ip = "0.0.0.0"
+disable_registration = false
+port = 8000
+tls = "none"
+corsorigins = [ "*" ]
+use_header = true,
+header_name = "X-Forwarded-For"
+----
+
+With the default parameters, this results in the following config:
+
+[source,toml]
+----
+[general]
+listen = "0.0.0.0:5533"
+protocol = "both4"
+debug = false
+records = [
+    '${acme_dns:config:general:domain}. NS ${acme_dns:config:general:nsname}.'
+]
+domain = "acme-dns.example.com"
+nsname = "acme-dns-ns.example.com"
+nsadmin = "support.example.com"
+
+[database]
+engine = "sqlite3"
+connection = "/var/lib/acme-dns/acme-dns.db"
+
+[api]
+ip = "0.0.0.0"
+disable_registration = false
+port = 8000
+tls = "none"
+corsorigins = [ "*" ]
+use_header = true,
+header_name = "X-Forwarded-For"
+
+[logconfig]
+loglevel = "info"
+logtype = "stdout"
+logformat = "json"
+----
+
+== `persistence`
+
+This parameter configures the persistent volume and backups for the acme-dns sqlite database.
+This parameter doesn't have an effect if parameters `config.database.engine` and `config.database.connection` point to an external Postgres database.
+
+=== `persistence.enabled`
+
+[horizontal]
+type:: boolean
+default:: `true`
+
+Whether to provision a persistent volume for the acme-dns sqlite database.
+
+WARNING: With `persistence.enabled=false`, any registered acme-dns clients and TXT records will be lost when the acme-dns Pod is restarted.
+
+=== `persistence.volumeSize`
+
+[horizontal]
+type:: https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/#Quantity[Kubernetes Quantity]
+default:: `1Gi`
+
+The size of persistent volume to request.
+Used as `spec.resources.requests.storage` in the `PersistentVolumeClaim` object.
+
+=== `persistence.storageClassName`
+
+[horizontal]
+type:: string
+default:: `null`
+
+The storage class for the PVC.
+Used as `spec.storageClassName`, if the parameter isn't `null`.
+Otherwise, the cluster's default storage class is used for the PVC.
+
+
+=== `persistence.backup`
+
+[horizontal]
+type:: dict
+default::
++
+[source,yaml]
+----
+enabled: true
+schedule: '*/30 * * * *'
+endpoint: ~
+bucket: thebucket
+password: ?{vaultkv:${cluster:tenant}/${cluster:name}/acme-dns/${_instance}/backup-password}
+accesskey: ?{vaultkv:${cluster:tenant}/${cluster:name}/acme-dns/${_instance}/backup-accesskey}
+secretkey: ?{vaultkv:${cluster:tenant}/${cluster:name}/acme-dns/${_instance}/backup-secretkey}
+----
+
+The configuration for the K8up backup of the sqlite database.
+
+Parameter `enabled` controls whether the K8up backup is configured or not.
+The backup is never configured when parameter `persistence.enabled` is `false`.
+
+* Parameter `schedule` is used as the value for `spec.backup.schedule` in the https://k8up.io/k8up/1.2.0/references/object-specifications.html#_schedule[K8up `Schedule`] object.
+* Parameter `endpoint` is the S3 endpoint for the bucket.
+If parameter `endpoint` is `null`, the s3_endpoint of the global K8up config is used.
+* Parameter `bucket` is used as the S3 bucket name.
+* Parameter `password` is used as the Restic password for the backup.
+* Parameters `accesskey` and `secretkey` are the credentials to access the S3 bucket.

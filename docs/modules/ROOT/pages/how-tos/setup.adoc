@@ -1,0 +1,109 @@
+= Component setup
+
+This guide helps you to get an acme-dns instance deployed and configured as a nameserver for a zone of your domain.
+
+== Prerequisites
+
+* You can locally https://syn.tools/syn/how-tos/compile-catalog.html[compile a cluster catalog]
+* You have a Kubernetes or OpenShift cluster which supports service type `LoadBalancer`
+* `curl`
+* `jq`
+* `vault` CLI
+
+== Enable the acme-dns component
+
+. Add the following configuration to your cluster's `c-cluster-id.yml` file:
++
+[source,yaml]
+----
+applications:
+  - acme-dns as acme-dns-prod <1>
+
+paramters:
+  acme_dns_prod: <2>
+    namespace: syn-acme-dns-prod <3>
+    api:
+      hostname: acme-dns-api.example.org <4>
+    config:
+      general:
+        domain: acme-dns.example.org <5>
+        nsname: acme-dns-ns.example.org <6>
+        nsadmin: support@example.org <7>
+----
+<1> You can instantiate the acme-dns component if you want to run multiple acme-dns instances on the same cluster.
+<2> Configure the component instance, rather than the component itself.
+<3> Override the namespace to use to be more succinct than the generated version.
+<4> Configure the hostname for the acme-dns HTTP API.
+<5> Configure the zone for which the acme-dns instance will serve DNS records.
+<6> Configure the DNS name of the nameserver (the acme-dns instance itself).
+<7> Configure the email address of the domain/zone administrator.
++
+IMPORTANT: Make sure that configurations +++<i class="conum" data-value="4"></i>+++ - +++<i class="conum" data-value="7"></i>+++ refer to a domain that you administrate.
++
+NOTE: See the xref:references/parameters.adoc[parameters] documentation for all the configuration parameters of the component.
+
+. Compile the cluster catalog to deploy acme-dns to the cluster
+
+== Configure the DNS parent zone
+
+To configure your new acme-dns instance as the nameserver for the zone you've configured, you need to add a few records to the zone's parent zone.
+
+[source,dns]
+----
+$ORIGIN example.org
+acme-dns-api    IN CNAME    your.cluster.ingress.example.org. <1>
+acme-dns-ns     IN A        198.51.100.101 <2>
+acme-dns        IN NS       acme-dns-ns.example.org. <3>
+----
+<1> Configure a `CNAME` (or `A`) record, which points to the ingress controller of your target cluster.
+<2> Replace `198.51.100.101` with the IP assigned to the `LoadBalancer` service created by the component.
+You can get the IP by accessing the cluster on which you've deployed the acme-dns instance, and executing the following command:
++
+[source,console]
+----
+$ export KUBECONFIG=/path/to/target/cluster.kubeconfig
+$ kubectl -n syn-acme-dns-prod get svc acme-dns -ojsonpath='{.status.loadBalancer.ingress[0].ip}'
+----
+<3> Configure a NS record which delegates DNS queries for `*.acme-dns.example.org` to the acme-dns instance at `acme-dns-ns.example.org`.
+
+== Test the acme-dns instance
+
+At this point, the acme-dns instance should be ready to use.
+
+You can test the instance with the following sequence of commands:
+
+[source,console]
+----
+$ export ACME_DNS_API=https://acme-dns-api.example.org <1>
+$ export VAULT_ADDR=https://vault-instance.example.org <2>
+$ vault login -method=<login-method> login_arg=login_value <3>
+$ register_pw=$(vault kv get -format=json \
+    clusters/kv/${TENANT_ID}/${CLUSTER_ID}/acme-dns/vshn-acme-dns-prod \
+    | jq -r '.data.data."api-password"')
+$ client_credentials=$(curl -u "acme-dns:${register_pw}" "${ACME_DNS_API}/register" -XPOST)
+$ client_username=$(echo "${client_credentials} | jq -r '.username')
+$ client_password=$(echo "${client_credentials} | jq -r '.password')
+$ client_subdomain=$(echo "${client_credentials} | jq -r '.subdomain')
+$ curl -H"X-Api-User: ${client_username}" \
+    -H"X-Api-Key: ${client_password}" \
+    -d '{
+      "subdomain": "${client_subdomain}",
+      "txt": "___validation_token_received_from_the_ca___"
+    }' \
+    "${ACME_DNS_API}/update"
+$ client_fulldomain=$(echo "${client_credentials} | jq -r '.fulldomain')
+$ dig "${client_fulldomain}" TXT
+
+[ ... ]
+
+;; ANSWER SECTION:
+<subdomain>.acme-dns.vshn.net.	1 IN TXT "___validation_token_received_from_the_ca___" <4>
+
+[ ... ]
+----
+<1> The hostname for the acme-dns HTTP API.
+<2> Replace with the address of your Project Syn Vault.
+<3> Select a login method you've configured on your Vault instance and provide necessary login arguments for the login method.
+<4> `dig` should return the TXT record we created via the API.
+
+To configure a client, such as cert-manager, to use your acme-dns instance, see xref:how-tos/configure-client.adoc[configuring a client].

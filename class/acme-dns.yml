@@ -8,4 +8,4 @@ parameters:
       - input_paths:
           - acme-dns/component/main.jsonnet
         input_type: jsonnet
-        output_path: acme-dns/
+        output_path: acme-dns/${_instance}
