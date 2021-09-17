@@ -112,7 +112,7 @@ default::
 ----
 loglevel: info
 logtype: stdout
-logformat: text
+logformat: json
 ----
 
 The acme-dns log configuration.
@@ -176,7 +176,7 @@ header_name = "X-Forwarded-For"
 [logconfig]
 loglevel = "info"
 logtype = "stdout"
-logformat = "text"
+logformat = "json"
 ----
 
 == `persistence`

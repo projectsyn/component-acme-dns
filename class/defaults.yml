@@ -39,7 +39,7 @@ parameters:
       logconfig:
         loglevel: info
         logtype: stdout
-        logformat: text
+        logformat: json
 
     persistence:
       # enabled=false -> store sqlite db in emptydir
