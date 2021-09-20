@@ -62,7 +62,8 @@ You can get the IP by accessing the cluster on which you've deployed the acme-dn
 [source,console]
 ----
 $ export KUBECONFIG=/path/to/target/cluster.kubeconfig
-$ kubectl -n syn-acme-dns-prod get svc acme-dns -ojsonpath='{.status.loadBalancer.ingress[0].ip}'
+$ kubectl -n syn-acme-dns-prod get svc acme-dns \
+    -ojsonpath='{.status.loadBalancer.ingress[0].ip}'
 ----
 <3> Configure a NS record which delegates DNS queries for `*.acme-dns.example.org` to the acme-dns instance at `acme-dns-ns.example.org`.
 
