@@ -1,3 +1,50 @@
 = Configuring a client
 
-TODO
+== cert-manager
+
+If you're using the Project Syn component for cert-manager, you can see the component's how-to on xref:cert-manager:ROOT:how-tos/dns01.adoc[Using DNS01 challenges].
+
+Otherwise, follow the steps below, and see the https://cert-manager.io/docs/configuration/acme/dns01/acme-dns/[cert-manager] documentation for details on how to configure cert-manager to use the acme-dns client credentials.
+
+== Other clients
+
+To manually register and configure an acme-dns client you need to perform the following steps.
+
+. Register the client on the acme-dns instance
++
+[source,bash]
+----
+reg_user=acme-dns <1>
+reg_pass=password <2>
+api_url=https://acme-dns-api.example.com <3>
+client_config=$(curl -XPOST -u "${reg_user}:${reg_pass}" "${api_url}/register")
+----
+<1> HTTP basic authentication username for `/register` endpoint
+<2> HTTP basic authentication password for `/register` endpoint
+<3> HTTP API URL of the acme-dns instance
+
+. Setup CNAME record on the FQDN for which you want to serve TXT records from the acme-dns instance
++
+[source,dns]
+----
+$ORIGIN cluster.example.com <1>
+_acme-challenge.<name> IN CNAME <fulldomain>. <2>
+----
+<1> Replace with the zone of your FQDN.
+<2> Replace `<name>` with the DNS name of your FQDN in the zone.
+Simply use `_acme-challenge` to serve TXT records for DNS01 challenges for DNS names `cluster.example.com` and `*.cluster.example.com`.
++
+Replace `<fulldomain>` with the output of the following command:
++
+[source,bash]
+----
+echo "${client_config}" | jq -r '.fulldomain'
+----
+
+. Setup your client to use the credentials from the first step to talk to the acme-dns instance.
++
+.Print client credentials
+[source,bash]
+----
+echo "${client_config}"
+----
