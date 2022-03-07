@@ -1,7 +1,7 @@
 parameters:
   acme_dns:
-    =_metadata: {}
-    multi_instance: true
+    =_metadata:
+      multi_instance: true
     namespace: syn-acme-dns-${_instance}
 
     images:
