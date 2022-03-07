@@ -3,5 +3,6 @@ kind: Namespace
 metadata:
   annotations: {}
   labels:
+    extra: label
     name: syn-acme-dns-acme-dns
   name: syn-acme-dns-acme-dns
