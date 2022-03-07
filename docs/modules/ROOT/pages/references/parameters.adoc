@@ -19,6 +19,21 @@ The namespace in which to deploy this component.
 
 IMPORTANT: The component requires that each instance is configured with a separate namespace.
 
+== `namespaceLabels`
+
+[horizontal]
+type:: object
+default:: `{}`
+
+Additional labels to add to the namespace.
+
+[IMPORTANT]
+====
+The component doesn't validate the elements of this object.
+Users must ensure that all entries in the object are valid Kubernetes label key-value pairs.
+Kubernetes only supports labels where both the key and value are strings.
+====
+
 == `images`
 
 [horizontal]

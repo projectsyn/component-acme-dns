@@ -3,6 +3,7 @@ parameters:
     =_metadata:
       multi_instance: true
     namespace: syn-acme-dns-${_instance}
+    namespaceLabels: {}
 
     images:
       acme-dns:
