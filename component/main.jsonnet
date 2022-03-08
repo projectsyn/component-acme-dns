@@ -13,7 +13,11 @@ local params = inv.parameters.acme_dns;
 local on_ocp3 = inv.parameters.facts.distribution == 'openshift3';
 
 
-local namespace = kube.Namespace(params.namespace);
+local namespace = kube.Namespace(params.namespace) {
+  metadata+: {
+    labels+: params.namespaceLabels,
+  },
+};
 
 local pvc = kube.PersistentVolumeClaim('acmedns-data') {
   spec: std.prune({

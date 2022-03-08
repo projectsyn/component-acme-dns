@@ -11,3 +11,7 @@ parameters:
     global_backup_config:
       s3_endpoint: null
     prometheus_push_gateway: null
+
+  acme_dns:
+    namespaceLabels:
+      extra: label
