@@ -1,9 +1,0 @@
-:global:
-  componentName: acme-dns
-  githubUrl: https://github.com/projectsyn/component-acme-dns
-  feature_goUnitTests: false
-  feature_goldenTests: true
-
-docs/antora.yml:
-  name: acme-dns
-  title: acme-dns
