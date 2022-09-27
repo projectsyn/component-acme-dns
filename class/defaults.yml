@@ -9,11 +9,11 @@ parameters:
       acme-dns:
         registry: docker.io
         repository: joohoi/acme-dns
-        tag: latest
+        tag: v1.0
       caddy:
         registry: docker.io
         repository: caddy/caddy
-        tag: alpine
+        tag: 2.6.1-alpine
       sqlite:
         registry: docker.io
         repository: nouchka/sqlite3
