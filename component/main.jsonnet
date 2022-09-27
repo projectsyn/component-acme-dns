@@ -108,7 +108,7 @@ local deployment = kube.Deployment('acme-dns') {
           },
           caddy: kube.Container('caddy') {
             image: common.image(params.images.caddy),
-            command: [ 'caddy', 'run', '-config', '/etc/caddy/caddy.json' ],
+            command: [ 'caddy', 'run', '--config', '/etc/caddy/caddy.json' ],
             ports_: {
               api: {
                 protocol: 'TCP',
