@@ -17,6 +17,9 @@ parameters:
       sqlite:
         registry: docker.io
         repository: nouchka/sqlite3
+        # We use the sqlite3 image for K8up-based backups. Unfortunately
+        # there's no tags other than latest for the nouchka/sqlite3 image, so
+        # we're using latest here.
         tag: latest
 
     api:
