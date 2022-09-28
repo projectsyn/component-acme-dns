@@ -28,8 +28,8 @@ spec:
       containers:
         - args: []
           env: []
-          image: docker.io/joohoi/acme-dns:latest
-          imagePullPolicy: Always
+          image: docker.io/joohoi/acme-dns:v1.0
+          imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
             httpGet:
@@ -68,7 +68,7 @@ spec:
             - --config
             - /etc/caddy/caddy.json
           env: []
-          image: docker.io/caddy/caddy:alpine
+          image: docker.io/caddy/caddy:2.6.1-alpine
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
@@ -109,7 +109,7 @@ spec:
           envFrom:
             - secretRef:
                 name: acmedns-basicauth
-          image: docker.io/caddy/caddy:alpine
+          image: docker.io/caddy/caddy:2.6.1-alpine
           imagePullPolicy: IfNotPresent
           name: render-caddy-config
           ports: []
