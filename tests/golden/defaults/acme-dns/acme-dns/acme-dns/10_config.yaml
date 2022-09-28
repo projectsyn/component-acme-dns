@@ -62,7 +62,9 @@ data:
     {"handle": [{"body": "OK", "handler": "static_response", "status_code": 200}],
     "match": [{"path": ["/healthz"]}]}, {"handle": [{"handler": "reverse_proxy", "upstreams":
     [{"dial": "127.0.0.1:8000"}]}]}]}}}}}'
-  render-config: 'pw=`caddy hash-password -plaintext ${BASIC_AUTH_PASSWORD}`
+  render-config: 'set -e
+
+    pw=`caddy hash-password --plaintext ${BASIC_AUTH_PASSWORD}`
 
     sed -e "s/THE_PASSWORD/${pw}/" /etc/caddy/caddy.json.tpl > /etc/caddy.out/caddy.json
 
