@@ -83,7 +83,8 @@ local base_config = {
   configmap: kube.ConfigMap(common.caddy.cm_name) {
     data: {
       'render-config': |||
-        pw=`caddy hash-password -plaintext ${BASIC_AUTH_PASSWORD}`
+        set -e
+        pw=`caddy hash-password --plaintext ${BASIC_AUTH_PASSWORD}`
         sed -e "s/THE_PASSWORD/${pw}/" /etc/caddy/caddy.json.tpl > /etc/caddy.out/caddy.json
       |||,
       'caddy.json.tpl': '%s' % [ base_config ],
