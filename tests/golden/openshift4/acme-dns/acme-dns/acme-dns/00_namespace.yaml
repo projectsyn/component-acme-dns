@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  annotations: {}
+  labels:
+    name: syn-acme-dns-acme-dns
+  name: syn-acme-dns-acme-dns

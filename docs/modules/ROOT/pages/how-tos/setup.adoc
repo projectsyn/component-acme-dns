@@ -2,6 +2,19 @@
 
 This guide helps you to get an acme-dns instance deployed and configured as a nameserver for a zone of your domain.
 
+[NOTE]
+====
+On Openshift 4, the component will run the `acme-dns` container as UID 0.
+Otherwise, on OpenShift 4.11, the container creation fails with
+
+[source]
+----
+Error: container create failed: time="2022-12-13T13:06:02Z" level=error msg="runc create failed: unable to start container process: exec: \"./acme-dns\": stat ./acme-dns: permission denied"
+----
+
+To allow the container to run with UID 0, we grant the `acme-dns` service account access to the `anyuid` SCC.
+====
+
 == Prerequisites
 
 * You can locally https://syn.tools/syn/how-tos/compile-catalog.html[compile a cluster catalog]

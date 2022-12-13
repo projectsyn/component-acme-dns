@@ -1,0 +1,102 @@
+apiVersion: v1
+data: {}
+kind: Secret
+metadata:
+  annotations: {}
+  labels:
+    name: acme-dns-backup-password
+  name: acme-dns-backup-password
+  namespace: syn-acme-dns-acme-dns
+stringData:
+  password: t-silent-test-1234/c-green-test-1234/acme-dns/acme-dns/backup-password
+type: Opaque
+---
+apiVersion: v1
+data: {}
+kind: Secret
+metadata:
+  annotations: {}
+  labels:
+    name: acme-dns-backup-s3-credentials
+  name: acme-dns-backup-s3-credentials
+  namespace: syn-acme-dns-acme-dns
+stringData:
+  accesskey: t-silent-test-1234/c-green-test-1234/acme-dns/acme-dns/backup-accesskey
+  secretkey: t-silent-test-1234/c-green-test-1234/acme-dns/acme-dns/backup-secretkey
+type: Opaque
+---
+apiVersion: backup.appuio.ch/v1alpha1
+kind: PreBackupPod
+metadata:
+  name: acme-dns-backup
+  namespace: syn-acme-dns-acme-dns
+spec:
+  backupCommand: /bin/sh -c "sqlite3 /var/lib/acme-dns/acme-dns.db .dump | gzip -f"
+  fileExtension: .sql.gz
+  pod:
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: name
+                    operator: In
+                    values:
+                      - acme-dns
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - args: []
+          command:
+            - tail
+            - -f
+            - /dev/null
+          env: []
+          image: docker.io/nouchka/sqlite3:latest
+          imagePullPolicy: Always
+          name: acme-dns-backup
+          ports: []
+          stdin: false
+          tty: false
+          volumeMounts:
+            - mountPath: /var/lib/acme-dns
+              name: acmedns-data
+      imagePullSecrets: []
+      initContainers: []
+      terminationGracePeriodSeconds: 30
+      volumes:
+        - name: acmedns-data
+          persistentVolumeClaim:
+            claimName: acmedns-data
+---
+apiVersion: backup.appuio.ch/v1alpha1
+kind: Schedule
+metadata:
+  name: acme-dns
+  namespace: syn-acme-dns-acme-dns
+spec:
+  backend:
+    repoPasswordSecretRef:
+      key: password
+      name: acme-dns-backup-password
+    s3:
+      accessKeyIDSecretRef:
+        key: accesskey
+        name: acme-dns-backup-s3-credentials
+      bucket: c-green-test-1234-syn-acme-dns-acme-dns-backup
+      endpoint: null
+      secretAccessKeySecretRef:
+        key: secretkey
+        name: acme-dns-backup-s3-credentials
+  backup:
+    keepJobs: 3
+    promURL: null
+    schedule: '*/30 * * * *'
+  check:
+    promURL: null
+    schedule: 30 3 * * *
+  prune:
+    retention:
+      keepDaily: 30
+      keepLast: 5
+    schedule: 30 2 * * *

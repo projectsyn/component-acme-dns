@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    name: acme-dns-api
+  name: acme-dns-api
+  namespace: syn-acme-dns-acme-dns
+spec:
+  ports:
+    - name: api
+      port: 8080
+      targetPort: 8080
+  selector:
+    name: acme-dns
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations: {}
+  labels:
+    name: acme-dns
+  name: acme-dns
+  namespace: syn-acme-dns-acme-dns
+spec:
+  ports:
+    - name: dns
+      port: 53
+      protocol: UDP
+      targetPort: 5533
+  selector:
+    name: acme-dns
+  type: LoadBalancer
