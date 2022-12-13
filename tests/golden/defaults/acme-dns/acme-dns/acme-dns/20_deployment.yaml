@@ -120,6 +120,7 @@ spec:
               name: caddy-config
             - mountPath: /etc/caddy
               name: caddy-config-template
+      serviceAccountName: acme-dns
       terminationGracePeriodSeconds: 30
       volumes:
         - configMap:

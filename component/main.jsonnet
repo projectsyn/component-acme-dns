@@ -11,6 +11,7 @@ local caddy_config = import 'caddy-config.libsonnet';
 local inv = kap.inventory();
 local params = inv.parameters.acme_dns;
 local on_ocp3 = inv.parameters.facts.distribution == 'openshift3';
+local on_ocp4 = inv.parameters.facts.distribution == 'openshift4';
 
 
 local namespace = kube.Namespace(params.namespace) {
@@ -40,6 +41,33 @@ local dataVolume =
     emptyDir: {},
   };
 
+// XXX: the acme-dns container must run as uid 0, as the acme-dns binary is
+// stored in the container's /root which is not accessible to any users except
+// root, cf. https://github.com/joohoi/acme-dns/blob/6ba9360156b8658dbbd652eea100c11cc098b1f8/Dockerfile
+// I don't like this, but I don't see another option to unbreak this for OCP
+// 4.11, except for building a custom acme-dns container image. -SG,2022-12-13.
+local anyuid =
+  local sa = kube.ServiceAccount('acme-dns') {
+    metadata+: {
+      namespace: params.namespace,
+    },
+  };
+  {
+    sa: sa,
+  } + if on_ocp4 then {
+    scc_rb: kube.RoleBinding('acmedns-scc-anyuid') {
+      metadata+: {
+        namespace: params.namespace,
+      },
+      roleRef: {
+        apiGroup: 'rbac.authorization.k8s.io',
+        kind: 'ClusterRole',
+        name: 'system:openshift:scc:anyuid',
+      },
+      subjects_: [ sa ],
+    },
+  } else {};
+
 local configs = [
   acmedns_config.configmap,
   caddy_config.configmap,
@@ -65,6 +93,7 @@ local deployment = kube.Deployment('acme-dns') {
       },
       spec+: {
         default_container:: 'acme_dns',
+        serviceAccountName: anyuid.sa.metadata.name,
         containers_:: {
           acme_dns: kube.Container('acme-dns') {
             image: common.image(params.images['acme-dns']),
@@ -104,6 +133,12 @@ local deployment = kube.Deployment('acme-dns') {
               periodSeconds: 10,
               successThreshold: 1,
               timeoutSeconds: 1,
+            },
+            [if on_ocp4 then 'securityContext']: {
+              // XXX: We need to run the acme-dns container as root on
+              // openshift4, as otherwise container creation fails because the
+              // random UID can't stat the acme-dns binary in /root.
+              runAsUser: 0,
             },
           },
           caddy: kube.Container('caddy') {
@@ -313,6 +348,7 @@ std.mapWithKey(
   {
     [if params.persistence.enabled then '10_pvc']:
       pvc,
+    '02_rbac': std.objectValues(anyuid),
     '10_config': configs,
     '20_deployment': deployment,
     '30_service': [ api_service, dns_service ],
