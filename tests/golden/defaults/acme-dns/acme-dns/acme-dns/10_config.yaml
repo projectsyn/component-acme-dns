@@ -1,50 +1,29 @@
 apiVersion: v1
 data:
-  config.cfg: '[api]
-
+  config.cfg: |-
+    [api]
     corsorigins=["*"]
-
     disable_registration=false
-
     header_name="X-Forwarded-For"
-
     ip="0.0.0.0"
-
     port="8000"
-
     tls="none"
-
     use_header=true
-
     [database]
-
     connection="/var/lib/acme-dns/acme-dns.db"
-
     engine="sqlite3"
-
     [general]
-
     debug=false
-
     domain="acme-dns.example.com"
-
     listen="0.0.0.0:5533"
-
     nsadmin="support.example.com"
-
     nsname="acme-dns-ns.example.com"
-
     protocol="both4"
-
     records=["acme-dns.example.com. NS acme-dns-ns.example.com."]
-
     [logconfig]
-
     logformat="json"
-
     loglevel="info"
-
-    logtype="stdout"'
+    logtype="stdout"
 kind: ConfigMap
 metadata:
   annotations: {}
@@ -62,13 +41,10 @@ data:
     {"handle": [{"body": "OK", "handler": "static_response", "status_code": 200}],
     "match": [{"path": ["/healthz"]}]}, {"handle": [{"handler": "reverse_proxy", "upstreams":
     [{"dial": "127.0.0.1:8000"}]}]}]}}}}}'
-  render-config: 'set -e
-
+  render-config: |
+    set -e
     pw=`caddy hash-password --plaintext ${BASIC_AUTH_PASSWORD}`
-
     sed -e "s/THE_PASSWORD/${pw}/" /etc/caddy/caddy.json.tpl > /etc/caddy.out/caddy.json
-
-    '
 kind: ConfigMap
 metadata:
   annotations: {}
