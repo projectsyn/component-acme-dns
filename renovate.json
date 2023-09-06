@@ -5,6 +5,9 @@
     ":disableDependencyDashboard",
     ":semanticCommitsDisabled"
   ],
+  "ignorePaths": [
+    ".github/**"
+  ],
   "postUpgradeTasks": {
     "commands": [
       "make gen-golden-all"
