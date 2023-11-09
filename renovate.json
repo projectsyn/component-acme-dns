@@ -18,5 +18,6 @@
   "suppressNotifications": [ "artifactErrors" ],
   "labels": [
     "dependency"
-  ]
+  ],
+  "separateMinorPatch": true
 }
