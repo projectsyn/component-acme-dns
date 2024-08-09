@@ -13,7 +13,7 @@ parameters:
       caddy:
         registry: docker.io
         repository: caddy/caddy
-        tag: 2.7.6-alpine
+        tag: 2.8.4-alpine
       sqlite:
         registry: docker.io
         repository: nouchka/sqlite3
