@@ -1,0 +1,16 @@
+name: Validate generated Caddy config
+on:
+  pull_request:
+    branches:
+      - master
+
+env:
+  COMPONENT_NAME: acme-dns
+
+jobs:
+  validate_caddy_config:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Caddy config
+        run: make lint_validate_caddy_config
