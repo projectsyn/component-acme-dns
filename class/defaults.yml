@@ -2,6 +2,7 @@ parameters:
   acme_dns:
     =_metadata:
       multi_instance: true
+      multi_tenant: true
     namespace: syn-acme-dns-${_instance}
     namespaceLabels: {}
 
