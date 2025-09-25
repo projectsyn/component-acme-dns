@@ -68,7 +68,7 @@ spec:
             - --config
             - /etc/caddy/caddy.json
           env: []
-          image: docker.io/caddy/caddy:2.8.4-alpine
+          image: docker.io/caddy/caddy:2.10.2-alpine
           imagePullPolicy: IfNotPresent
           livenessProbe:
             failureThreshold: 3
@@ -109,7 +109,7 @@ spec:
           envFrom:
             - secretRef:
                 name: acmedns-basicauth
-          image: docker.io/caddy/caddy:2.8.4-alpine
+          image: docker.io/caddy/caddy:2.10.2-alpine
           imagePullPolicy: IfNotPresent
           name: render-caddy-config
           ports: []
